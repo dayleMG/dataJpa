@@ -1,6 +1,8 @@
 package datajpa.datajpa.entity;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.persistence.*;
@@ -10,6 +12,7 @@ import java.util.List;
 @Entity
 @Getter
 @ToString(of = {"id", "name"})
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Team {
 
     @GeneratedValue @Id

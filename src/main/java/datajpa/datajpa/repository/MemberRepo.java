@@ -4,15 +4,17 @@ import datajpa.datajpa.dto.MemberDto;
 import datajpa.datajpa.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.QueryHint;
 import java.util.List;
 import java.util.Optional;
 
 
-public interface MemberRepo extends JpaRepository<Member, Long> {
+public interface MemberRepo extends JpaRepository<Member, Long>, MemberRepoCustom {
 
     //@Query 기능
     @Query("select m from Member m where m.username = :username and m.age = :age")
@@ -38,5 +40,25 @@ public interface MemberRepo extends JpaRepository<Member, Long> {
     countQuery = "select count(m) from Member m")
     Page<Member> findByAge(int age, Pageable pageable);
 
+    //벌크성 수정 쿼리
+    @Modifying(clearAutomatically = true)
+    @Query("update Member m set m.age = m.age +1 where m.age >= :age")
+    int bulckAge(@Param("age") int age);
 
+    @Query("select m from Member m left join fetch m.team")
+    List<Member> findMemberFetchJoin();
+
+    @Override
+    @EntityGraph(attributePaths = {"team"})
+    List<Member> findAll();
+
+    @Query("select m from Member m")
+    @EntityGraph(attributePaths = {"team"})
+    List<Member> findMemberEntityGraph();
+
+    @EntityGraph(attributePaths = {"team"})
+    List<Member> findByAge(int age);
+
+    @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true"))
+    Member findReadOnlyByUsername(String username);
 }
